@@ -9,11 +9,24 @@ import {
   MenuIcon,
 } from "@heroicons/react/outline"
 import { HomeIcon } from "@heroicons/react/solid"
-import Link from "next/link"
-import { signIn, signOut } from "next-auth/react"
+import { signOut } from "next-auth/react"
+import { useDispatch } from "react-redux"
+import { logOutUser } from "../redux/slices/authSlice"
+import { useRouter } from "next/router"
 
 const Header = ({ session }) => {
-  console.log(session)
+  const { data: sessionData, status: sessionStatus } = session
+  const dispatch = useDispatch()
+  const router = useRouter()
+
+  const signoutHandler = async () => {
+    dispatch(logOutUser())
+    const redirecting = await signOut({
+      redirect: false,
+      callbackUrl: "/custom/signin",
+    })
+    router.push(redirecting.url)
+  }
   return (
     <div className="shadow-sm bg-white sticky top-0 z-50">
       <div className="flex justify-between max-w-6xl xl:mx-auto">
@@ -25,14 +38,14 @@ const Header = ({ session }) => {
             alt="img"
           />
         </div>
-        {/* <div className="w-10 relative lg:hidden flex-shrink-0">
+        <div className="w-10 relative lg:hidden flex-shrink-0 ml-3">
           <Image
             src="https://links.papareact.com/jjm"
             layout="fill"
             objectFit="contain"
             alt="img"
           />
-        </div> */}
+        </div>
 
         <div className="mx-w-xs">
           <div className="mt-1 relative p-3 rounded-md">
@@ -46,8 +59,10 @@ const Header = ({ session }) => {
             />
           </div>
         </div>
-        <div className="flex items-center justify-end space-x-3">
-          {session ? (
+        <div className="flex items-center justify-end space-x-3 mr-3">
+          {sessionStatus === "loading" ? (
+            <p>loading...</p>
+          ) : sessionData ? (
             <>
               <MenuIcon className="h-8 w-8 md:hidden cursor-pointer" />
               <HomeIcon className="navBtn" />
@@ -60,14 +75,16 @@ const Header = ({ session }) => {
               <PlusCircleIcon className="navBtn" />
               <UserGroupIcon className="navBtn" />
               <HeartIcon className="navBtn" />
-              <button onClick={signOut}>Sign Out</button>
+              <button onClick={signoutHandler}>Sign Out</button>
             </>
           ) : (
             <>
-              <button>
-                <Link href="/custom/signin">
-                  <a>Sign In</a>
-                </Link>
+              <button
+                onClick={() => {
+                  router.push(`/custom/signin?callbackUrl=${router.asPath}`)
+                }}
+              >
+                Sign In
               </button>
             </>
           )}

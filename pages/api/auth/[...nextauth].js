@@ -1,5 +1,9 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
+import GithubProvider from "next-auth/providers/github"
+import clientPromise from "../../../utils/connectDb"
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
+
 export default NextAuth({
   // Configure one or more authentication providers
   secret: process.env.AUTH_SECRET,
@@ -7,6 +11,10 @@ export default NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET_KEY,
+    }),
+    GithubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
     }),
     // ...add more providers here
   ],
@@ -18,18 +26,14 @@ export default NextAuth({
     // Seconds - How long until an idle session expires and is no longer valid.
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  adapter: MongoDBAdapter(clientPromise),
   callbacks: {
-    session: async ({ session, token }) => {
-      if (session?.user) {
-        session.user.id = token.uid
-      }
-      return session
-    },
-    jwt: async ({ user, token }) => {
-      if (user) {
-        token.uid = user.id
-      }
+    jwt: async ({ token }) => {
+      console.log(token)
       return token
+    },
+    session: async ({ session }) => {
+      return session
     },
   },
 })

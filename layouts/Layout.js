@@ -3,23 +3,28 @@ import React, { useEffect } from "react"
 import Header from "../components/Header"
 import { connect, useDispatch, useSelector } from "react-redux"
 import { bindActionCreators } from "redux"
-import { signInUser } from "../redux/slices/authSlice"
+import { logOutUser, signInUser } from "../redux/slices/authSlice"
 
 const Layout = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.authReducer)
   const dispatch = useDispatch()
   const session = useSession()
   useEffect(() => {
-    if (!isAuthenticated) {
-      if (session.data) {
-        dispatch(signInUser(session.data))
-      }
+    if (
+      session.data &&
+      session.status === "authenticated" &&
+      !isAuthenticated
+    ) {
+      dispatch(signInUser(session.data))
     }
-  }, [session, dispatch, isAuthenticated])
+    if (session.status === "unauthenticated" && isAuthenticated) {
+      dispatch(logOutUser())
+    }
+  }, [session])
   return (
     <>
-      <Header session={undefined} />
-      {children}
+      <Header session={session} />
+      <div className="p-3">{children}</div>
     </>
   )
 }
