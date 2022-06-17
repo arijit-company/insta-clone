@@ -6,13 +6,13 @@ import {
   updateDoc,
 } from "firebase/firestore"
 import React, { useState } from "react"
-import { db, storage } from "../utils/firbase"
+import { db, storage } from "../../utils/firbase"
 // import { useSession } from "next-auth/react"
 import { ref, getDownloadURL, uploadString } from "firebase/storage"
 import Swal from "sweetalert2"
 import { useSelector } from "react-redux"
 
-const Post = () => {
+const CreatePost = () => {
   const [inputFile, setInputFile] = useState(null)
   const [caption, setCaption] = useState("")
   // const { data: session , status: authStatus} = useSession()
@@ -124,4 +124,4 @@ const Post = () => {
   )
 }
 
-export default Post
+export default CreatePost

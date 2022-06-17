@@ -1,8 +1,9 @@
 import Head from "next/head"
+import { connect } from "react-redux"
 import Feed from "../components/Feed"
 import Layout from "../layouts/Layout"
 
-export default function Home() {
+const Home = () => {
   return (
     <Layout>
       <div className="">
@@ -16,3 +17,5 @@ export default function Home() {
     </Layout>
   )
 }
+
+export default connect((state) => state)(Home)

@@ -1,5 +1,5 @@
 import Image from "next/image"
-import React from "react"
+import React, { useCallback, useRef, useState } from "react"
 import {
   SearchIcon,
   PlusCircleIcon,
@@ -18,6 +18,8 @@ const Header = ({ session }) => {
   const { data: sessionData, status: sessionStatus } = session
   const dispatch = useDispatch()
   const router = useRouter()
+  const searchInput = useRef("")
+  // const [searchInput, setSearchInput] = useState("")
 
   const signoutHandler = async () => {
     dispatch(logOutUser())
@@ -27,6 +29,49 @@ const Header = ({ session }) => {
     })
     router.push(redirecting.url)
   }
+
+  // Originally inspired by  David Walsh (https://davidwalsh.name/javascript-debounce-function)
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // `wait` milliseconds.
+  const debounce = useCallback((func, wait) => {
+    let timeout
+
+    return function executedFunction(e) {
+      searchInput.current = e.target.value
+      const later = () => {
+        // null timeout to indicate the debounce ended; or you cann write something like clearTimeout(timeout)
+        timeout = null
+
+        func()
+      }
+
+      // This will reset the waiting every function execution.
+      // This is the step that prevents the function from
+      // being executed because it will never reach the
+      // inside of the previous setTimeout
+      clearTimeout(timeout)
+
+      // Restart the debounce waiting period.
+      // setTimeout returns a truthy value (it differs in web vs Node)
+      timeout = setTimeout(later, wait)
+    }
+  }, [])
+
+  let returnedFunction = debounce(function () {
+    // All the taxing stuff you do
+    console.log(searchInput.current)
+  }, 1000)
+
+  // const handleSearch = (e) => {
+  //   clearTimeout(timeout)
+
+  //   timeout = setTimeout(() => {
+  //     setSearchInput(e.target.value)
+  //     console.log(e.target.value)
+  //   }, 1000)
+  // }
+
   return (
     <div className="shadow-sm bg-white sticky top-0 z-50">
       <div className="flex justify-between max-w-6xl xl:mx-auto">
@@ -56,6 +101,7 @@ const Header = ({ session }) => {
               type="text"
               placeholder="Search"
               className=" bg-gray-50 block w-full pl-10 sm:text-sm border-gray-300 focus:ring-black focus:border-black rounded-lg"
+              onInput={returnedFunction}
             />
           </div>
         </div>
