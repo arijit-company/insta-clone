@@ -8,7 +8,9 @@ import Post from "./Post"
 import Loader from "../Loader"
 
 const Posts = () => {
-  const { posts, loading } = useSelector((state) => state.postReducer)
+  const { posts, loading, searchedData } = useSelector(
+    (state) => state.postReducer
+  )
 
   const dispatch = useDispatch()
 
@@ -33,8 +35,17 @@ const Posts = () => {
     <div>
       {loading && <Loader />}
       {!loading &&
+        !searchedData.status &&
         posts.length > 0 &&
         posts.map((e) => <Post key={e.id} doc={e} />)}
+
+      {searchedData.status &&
+        searchedData.data.length > 0 &&
+        searchedData.data.map((e) => <Post key={e.id} doc={e} />)}
+
+      {searchedData.status && !searchedData.data.length && (
+        <p>No search result found!</p>
+      )}
     </div>
   )
 }
