@@ -4,9 +4,8 @@ import Header from "../components/Header"
 import { connect, useDispatch, useSelector } from "react-redux"
 // import { bindActionCreators } from "redux"
 import { logOutUser, signInUser } from "../redux/slices/authSlice"
-import { cloudMessaging } from "../utils/firbase"
+import { cloudMessaging, onMessageListener } from "../utils/firbase"
 import ReactToast from "../components/notification/ReactToast"
-import { getMessaging } from "firebase/messaging"
 
 const Layout = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.authReducer)
@@ -19,25 +18,6 @@ const Layout = ({ children }) => {
     body: "",
   })
 
-  const onMessageListener = () => {
-    const messaging = getMessaging()
-    return new Promise((res) => {
-      messaging.onMessage((payload) => {
-        res(payload)
-      })
-    })
-  }
-  const getPushMessage = () => {
-    onMessageListener()
-      .then((payload) => {
-        console.log(payload)
-      })
-      .catch((err) => {
-        console.log("ERROR IN RECEIVING MSG IN Patient frontend header")
-        console.log(err)
-      })
-  }
-
   useEffect(() => {
     firebaseInit()
     async function firebaseInit() {
@@ -47,12 +27,14 @@ const Layout = ({ children }) => {
         console.log(err)
       }
     }
-  })
+  }, [])
 
   useEffect(() => {
-    setTimeout(() => {
-      getPushMessage()
-    }, 5000)
+    onMessageListener()
+      .then((payload) => {
+        console.log(payload, "onMessageListener")
+      })
+      .catch((err) => console.log(err, "onMessageListener useEffect"))
   }, [])
 
   useEffect(() => {
